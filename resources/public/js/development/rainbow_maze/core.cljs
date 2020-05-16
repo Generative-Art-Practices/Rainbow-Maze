@@ -1,51 +1,33 @@
 (ns rainbow-maze.core
-  (:require [quil.core :as q :include-macros true]
-            [quil.middleware :as m]))
+    (:require [quil.core :as q :include-macros true] 
+        [quil.middleware :as m]))
+
+(def scale 20)
 
 (defn setup []
-  ; Set frame rate to 30 frames per second.
-  (q/frame-rate 30)
-  ; Set color mode to HSB (HSV) instead of default RGB.
-  (q/color-mode :hsb)
-  ; setup function returns initial state. It contains
-  ; circle color and position.
-  {:color 0
-   :angle 0})
+    (q/background 0)
+    (q/frame-rate 240)
+    (q/color-mode :hsb)
+    {:x 0
+     :y 0})
 
-(defn update-state [state]
-  ; Update sketch state by changing circle color and position.
-  {:color (mod (+ (:color state) 0.7) 255)
-   :angle (+ (:angle state) 0.1)})
+(defn update-state [{:keys [x y] :as state}]
+    (let [new-x (if (>= x (q/width)) 0 (+ x scale))
+          new-y (if (zero? new-x) (+ y scale) y)]
+        {:x new-x
+         :y (if (>= new-y (q/height)) 0 new-y)}))
 
-(defn draw-state [state]
-  ; Clear the sketch by filling it with light-grey color.
-  (q/background 240)
-  ; Set circle color.
-  (q/fill (:color state) 255 255)
-  ; Calculate x and y coordinates of the circle.
-  (let [angle (:angle state)
-        x (* 150 (q/cos angle))
-        y (* 150 (q/sin angle))]
-    ; Move origin point to the center of the sketch.
-    (q/with-translation [(/ (q/width) 2)
-                         (/ (q/height) 2)]
-      ; Draw the circle.
-      (q/ellipse x y 100 100))))
+(defn draw-state [{:keys [x y once] :as state}]
+    (when (and (zero? x) (zero? y))
+        (q/background 0))
+    (q/stroke (rand-int 255) (rand-int 255) 255)
+    (if (> (rand) 0.5)
+        (q/line x y (+ x scale) (+ y scale))
+        (q/line x (+ y scale) (+ x scale) y)))
 
-; this function is called in index.html
-(defn ^:export run-sketch []
-  (q/defsketch rainbow-maze
-    :host "rainbow-maze"
+(q/defsketch rainbow-maze
     :size [500 500]
-    ; setup function called only once, during sketch initialization.
     :setup setup
-    ; update-state is called on each iteration before draw-state.
     :update update-state
     :draw draw-state
-    ; This sketch uses functional-mode middleware.
-    ; Check quil wiki for more info about middlewares and particularly
-    ; fun-mode.
-    :middleware [m/fun-mode]))
-
-; uncomment this line to reset the sketch:
-; (run-sketch)
+    :middleware [m/fun-mode])
