@@ -2,7 +2,7 @@
     (:require [quil.core :as q :include-macros true] 
         [quil.middleware :as m]))
 
-(def scale 20)
+(def scale 10)
 
 (defn setup []
     (q/background 0)
@@ -26,7 +26,7 @@
         (q/line x (+ y scale) (+ x scale) y)))
 
 (q/defsketch rainbow-maze
-    :size [500 500]
+    :size [600 600]
     :setup setup
     :update update-state
     :draw draw-state
